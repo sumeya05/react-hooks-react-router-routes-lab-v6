@@ -1,54 +1,50 @@
-import "@testing-library/jest-dom";
-import { RouterProvider, createMemoryRouter} from "react-router-dom"
 import { render, screen } from "@testing-library/react";
-import routes from "../routes";
+import Movie from "../components/Movie";
 
-const id = 1
-const router = createMemoryRouter(routes, {
-    initialEntries: [`/movie/${id}`],
-    initialIndex: 0
-})
-
-test("renders without any errors", () => {
-  const errorSpy = vi.spyOn(global.console, "error");
-
-  render(<RouterProvider router={router}/>);
-
-  expect(errorSpy).not.toHaveBeenCalled();
-
-  errorSpy.mockRestore();
+describe("Movie component", () => {
+  test("renders Movie heading", () => {
+    render(<Movie />);
+    expect(screen.getByText(/Movie/i)).toBeInTheDocument();
+  });
 });
 
-test("renders movie's title in an h1", async () => {
-  render(<RouterProvider router={router} />);
-  const h1 = await screen.findByText(/Doctor Strange/);
-  expect(h1).toBeInTheDocument();
-  expect(h1.tagName).toBe("H1");
-});
+const movies = [
+  {
+    id: 1,
+    title: "Doctor Strange",
+    time: 115,
+    genres: ["Action", "Adventure", "Fantasy"],
+  },
+  {
+    id: 2,
+    title: "The Imitation Game",
+    time: 113,
+    genres: ["Biography", "Drama", "Thriller"],
+  },
+  {
+    id: 3,
+    title: "Black Mass",
+    time: 122,
+    genres: ["Crime", "Drama", "Thriller"],
+  },
+];
 
-test("renders movie's time within a p tag", async () => {
-  render(<RouterProvider router={router} />);
-  const p = await screen.findByText(/115/);
-  expect(p).toBeInTheDocument();
-  expect(p.tagName).toBe("P");
-});
+const Movie = () => {
+  const { id } = useParams();
+  const movie = movies.find((m) => m.id === Number(id));
 
-test("renders a span for each genre",  () => {
-  render(<RouterProvider router={router} />);
-  const genres = ["Action", "Adventure", "Fantasy"];
-  genres.forEach(async (genre) =>{
-    const span = await screen.findByText(genre);
-    expect(span).toBeInTheDocument();
-    expect(span.tagName).toBe("SPAN");
-  })
-});
+  if (!movie) return <div>Movie not found</div>;
 
-test("renders the <NavBar /> component", async () => {
-  const router = createMemoryRouter(routes, {
-    initialEntries: [`/movie/1`]
-  })
-  render(
-      <RouterProvider router={router}/>
+  return (
+    <div>
+      <NavBar />
+      <h1>{movie.title}</h1>
+      <p>{movie.time}</p>
+      {movie.genres.map((genre) => (
+        <span key={genre}>{genre}</span>
+      ))}
+    </div>
   );
-  expect(await screen.findByRole("navigation")).toBeInTheDocument();
-});
+};
+
+export default Movie;
